@@ -1,14 +1,40 @@
+# main.py
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from tortoise.contrib.fastapi import RegisterTortoise
 
+from config import Settings
 from routers import router as api_router
+from utils.db import TORTOISE_ORM
 
-app = FastAPI()
+settings = Settings()
 
-app.include_router(api_router)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with RegisterTortoise(
+        app,
+        config=TORTOISE_ORM,
+        generate_schemas=True,
+        add_exception_handlers=True,
+    ):
+        yield
+
+
+# 1. Single FastAPI instantiation
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.app_version,
+    lifespan=lifespan,
+)
+
+# 2. CORS configuration (dev + prod domains)
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://0w.lat",
 ]
 
 app.add_middleware(
@@ -16,6 +42,15 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    # allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# 3. Health check route
+@app.get("/health", status_code=200)
+async def health_check():
+    return {"status": "ok"}
+
+
+# 4. Include routers
+app.include_router(api_router)

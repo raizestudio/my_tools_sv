@@ -22,8 +22,8 @@ COPY uv.lock ./
 RUN uv sync
 
 # Copy the wait script and ensure it is executable
-# COPY run/wait-for-db.sh /usr/local/bin/wait-for-db.sh
-# RUN chmod +x /usr/local/bin/wait-for-db.sh
+COPY run/wait-for-db.sh /usr/local/bin/wait-for-db.sh
+RUN chmod +x /usr/local/bin/wait-for-db.sh
 
 # Copy the rest of the code
 COPY . .
