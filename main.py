@@ -23,18 +23,17 @@ async def lifespan(app: FastAPI):
         yield
 
 
-# 1. Single FastAPI instantiation
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     lifespan=lifespan,
 )
 
-# 2. CORS configuration (dev + prod domains)
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "https://0w.lat",
+    "https://www.0w.lat",
 ]
 
 app.add_middleware(
@@ -44,13 +43,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
-
-
-# 3. Health check route
-@app.get("/health", status_code=200)
-async def health_check():
-    return {"status": "ok"}
-
 
 # 4. Include routers
 app.include_router(api_router)
