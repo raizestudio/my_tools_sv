@@ -1,0 +1,174 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: src/docker/Dockerfile
+    container_name: jmpt_sv
+    restart: unless-stopped
+    command: uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../:/app
+      - /app/.venv
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    environment: &app-env
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/src
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=jmpt
+      - DB_PASSWORD=jmpt
+      - DB_NAME=jmpt
+      - RABBITMQ_HOST=helios_rabbitmq
+      - CACHE_HOST=helios_valkey
+
+    networks:
+      - default
+      # - shared_net
+
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    #   rabbitmq:
+    #     condition: service_healthy
+    #   valkey:
+    #     condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+#
+#   worker:
+#     build:
+#       context: ..
+#       dockerfile: docker/Dockerfile
+#     container_name: helios_worker
+#     restart: unless-stopped
+#     # Run Taskiq with auto-reload
+#     command: uv run taskiq worker utils.broker:broker tasks.mail tasks.notification tasks.wheelsys tasks.guest_suite tasks.financial --reload
+#
+#     volumes:
+#       - ../:/app
+#       - /app/.venv
+#
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#
+#     environment: *app-env
+#
+#     depends_on:
+#       backend:
+#         condition: service_healthy
+#       rabbitmq:
+#         condition: service_healthy
+#       valkey:
+#         condition: service_healthy
+#
+#   scheduler:
+#     build:
+#       context: ..
+#       dockerfile: docker/Dockerfile
+#     container_name: helios_scheduler
+#     restart: unless-stopped
+#     command: uv run taskiq scheduler scheduler:scheduler tasks.wheelsys tasks.financial
+#     volumes:
+#       - ../:/app
+#       - /app/.venv
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#     environment: *app-env
+#     depends_on:
+#       rabbitmq:
+#         condition: service_healthy
+#       valkey:
+#         condition: service_healthy
+#       worker:
+#         condition: service_started
+#
+#   db:
+#     image: postgres:17
+#     container_name: helios_db
+#     restart: unless-stopped
+#     environment:
+#       POSTGRES_USER: helios
+#       POSTGRES_PASSWORD: helios
+#       POSTGRES_DB: helios
+#     ports:
+#       - target: 5432
+#         host_ip: 127.0.0.1
+#         published: 5432
+#         protocol: tcp
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#
+#     networks:
+#       - default
+#       # - shared_net
+#
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U helios"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+#
+#   valkey:
+#     image: valkey/valkey:latest
+#     container_name: helios_valkey
+#     restart: unless-stopped
+#     ports:
+#       - target: 6379
+#         host_ip: 127.0.0.1
+#         published: 6379
+#         protocol: tcp
+#     volumes:
+#       - valkey_data:/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "valkey-cli ping | grep PONG"]
+#       interval: 15s
+#       timeout: 5s
+#       retries: 3
+#
+#     environment:
+#       # - DATABASE_URL=postgres://helios:helios@db:6379/valkeydb
+#       - VALKEY_SECRET_KEY=your_secret_key
+#
+#   rabbitmq:
+#     image: rabbitmq:management
+#     container_name: helios_rabbitmq
+#     restart: unless-stopped
+#     ports:
+#       - target: 5672
+#         host_ip: 127.0.0.1
+#         published: 5672
+#         protocol: tcp
+#       - target: 15672
+#         host_ip: 127.0.0.1
+#         published: 15672
+#         protocol: tcp
+#     environment:
+#       - RABBITMQ_DEFAULT_USER=admin
+#       - RABBITMQ_DEFAULT_PASS=admin
+#     volumes:
+#       - rabbitmq_data:/var/lib/rabbitmq
+#       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+#     healthcheck:
+#       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 5
+#
+# volumes:
+#   postgres_data:
+#   valkey_data:
+#   rabbitmq_data:
+#
+# networks:
+#   shared_net:
+#     external: true
+#     name: shared_network
