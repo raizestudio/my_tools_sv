@@ -27,6 +27,7 @@ class Settings(BaseSettings):
         # "core",
         "url_shtnr",
         "secret",
+        "webhook",
     ]
 
     model_config = ConfigDict(env_file=".env")
