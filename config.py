@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     models: list[str] = [
         # "core",
         "url_shtnr",
+        "secret",
     ]
 
     model_config = ConfigDict(env_file=".env")
