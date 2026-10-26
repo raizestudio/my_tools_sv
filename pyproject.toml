@@ -10,6 +10,9 @@ requires-python = ">=3.13"
 dependencies = [
     "aerich>=0.10.1",
     "fastapi[standard]>=0.162.0",
+    "redis>=8.1.0",
+    "taskiq[reload]>=0.13.0",
+    "taskiq-aio-pika>=0.6.1",
     "tortoise-orm[asyncpg]>=1.1.9",
     "uvicorn[standard]>=0.54.0",
 ]
