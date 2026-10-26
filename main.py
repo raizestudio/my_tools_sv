@@ -62,6 +62,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
+    "http://localhost:3003",
     "https://0w.lat",
     "https://www.0w.lat",
 ]

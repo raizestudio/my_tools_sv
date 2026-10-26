@@ -5,31 +5,29 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: jmpt_sv
+    container_name: ${APP_NAME:-0w_sv}
     restart: unless-stopped
     command: uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
-      - "8000:8000"
+      - "${HOST_PORT:-8002}:8000"
     volumes:
       - ../:/app
       - /app/.venv
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
     environment: &app-env
       - PYTHONUNBUFFERED=1
-      # - PYTHONPATH=/app
-      # - WATCHFILES_FORCE_POLLING=true
+      # Internal Docker network addresses and ports
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=jmpt
       - DB_PASSWORD=jmpt
       - DB_NAME=jmpt
-      - RABBITMQ_HOST=helios_rabbitmq
-      - CACHE_HOST=helios_valkey
+      - CACHE_HOST=valkey
+      - CACHE_PORT=6379
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
 
     networks:
       - default
-      # - shared_net
 
     depends_on:
       db:
@@ -49,20 +47,15 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: jmpt_worker
+    container_name: ${APP_NAME:-0w_sv}_worker
     restart: unless-stopped
-    # Run Taskiq with auto-reload
     command: uv run taskiq worker utils.broker:broker --reload
-
     volumes:
       - ../:/app
       - /app/.venv
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
     environment: *app-env
-
     depends_on:
       backend:
         condition: service_healthy
@@ -75,7 +68,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: jmpt_scheduler
+    container_name: ${APP_NAME:-0w_sv}_scheduler
     restart: unless-stopped
     command: uv run taskiq scheduler utils.scheduler:scheduler tasks.maintenance
     volumes:
@@ -94,7 +87,7 @@ services:
 
   db:
     image: postgres:17
-    container_name: jmpt_db
+    container_name: ${APP_NAME:-0w_sv}_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: jmpt
@@ -103,15 +96,12 @@ services:
     ports:
       - target: 5432
         host_ip: 127.0.0.1
-        published: 5432
+        published: "${HOST_DB_PORT:-5433}"
         protocol: tcp
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     networks:
       - default
-      # - shared_net
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U jmpt"]
       interval: 5s
@@ -120,12 +110,12 @@ services:
 
   valkey:
     image: valkey/valkey:latest
-    container_name: helios_valkey
+    container_name: ${APP_NAME:-0w_sv}_valkey
     restart: unless-stopped
     ports:
       - target: 6379
         host_ip: 127.0.0.1
-        published: 6379
+        published: "${HOST_CACHE_PORT:-6380}"
         protocol: tcp
     volumes:
       - valkey_data:/data
@@ -134,23 +124,21 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-
     environment:
-      # - DATABASE_URL=postgres://jmpt:jmpt@db:6379/valkeydb
       - VALKEY_SECRET_KEY=your_secret_key
 
   rabbitmq:
     image: rabbitmq:management
-    container_name: helios_rabbitmq
+    container_name: ${APP_NAME:-0w_sv}_rabbitmq
     restart: unless-stopped
     ports:
       - target: 5672
         host_ip: 127.0.0.1
-        published: 5672
+        published: "${HOST_RABBITMQ_PORT:-5673}"
         protocol: tcp
       - target: 15672
         host_ip: 127.0.0.1
-        published: 15672
+        published: "${HOST_RABBITMQ_MGMT_PORT:-15673}"
         protocol: tcp
     environment:
       - RABBITMQ_DEFAULT_USER=admin

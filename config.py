@@ -4,10 +4,12 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # APP
-    app_name: str = "JMPT"
+    app_name: str = "0w_sv"
     app_version: str = "0.0.1"
+    host_port: int = 8000
 
     # DB
+    host_db_port: int = 5432
     db_user: str = "jmpt"
     db_password: str = "jmpt"
     db_host: str = "localhost"
@@ -16,6 +18,7 @@ class Settings(BaseSettings):
     db_test_name: str = "jmpt_test"
 
     # CACHE
+    host_cache_port: int = 6379
     cache_host: str = "localhost"
     cache_port: int = 6379
     cache_db: int = 0
@@ -23,11 +26,14 @@ class Settings(BaseSettings):
     cache_default_ttl: int = 300
 
     # RABBITMQ
+    host_rabbitmq_port: int = 5672
+    host_rabbitmq_mgmt_port: int = 15672
     rabbitmq_host: str = "localhost"
     rabbitmq_port: int = 5672
     rabbitmq_user: str = "admin"
     rabbitmq_password: str = "admin"
     rabbitmq_queue_name: str = "jmpt_queue"
+    rabbitmq_mgmt_port: int = 15672
 
     @property
     def db_url(self) -> str:
