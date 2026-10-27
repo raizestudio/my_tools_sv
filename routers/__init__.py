@@ -5,6 +5,7 @@ from . import (
     probe,
     secret,
     url_shtnr,
+    url_tracer,
     webhook,
 )
 
@@ -14,3 +15,6 @@ router.include_router(url_shtnr.router, prefix="/url-shtnr", tags=["url-shtnr"])
 router.include_router(secret.router, prefix="/secrets", tags=["secrets"])
 router.include_router(webhook.router, prefix="/webhooks", tags=["webhooks"])
 router.include_router(probe.router, prefix="/probe", tags=["network probe"])
+router.include_router(
+    url_tracer.router, prefix="/url-trace", tags=["url tracer"]
+)
