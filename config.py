@@ -1,11 +1,32 @@
+import tomllib
+from pathlib import Path
+
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
+
+
+def get_project_version() -> str:
+    pyproject_path = Path(__file__).resolve().parent / "pyproject.toml"
+
+    if not pyproject_path.exists():
+        pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
+
+    try:
+        with open(pyproject_path, "rb") as f:
+            data = tomllib.load(f)
+            return (
+                data.get("project", {}).get("version")
+                or data.get("tool", {}).get("poetry", {}).get("version")
+                or "0.0.0-dev"
+            )
+    except Exception:
+        return "0.0.0-dev"
 
 
 class Settings(BaseSettings):
     # APP
     app_name: str = "0w_sv"
-    app_version: str = "0.0.1"
+    app_version: str = get_project_version()
     host_port: int = 8000
 
     # DB

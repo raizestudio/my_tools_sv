@@ -13,4 +13,4 @@ async def root(request: Request):
 
 @router.get("/health")
 async def health(request: Request):
-    return {"detail": "We good."}
+    return {"detail": "We good.", "version": settings.app_version}
