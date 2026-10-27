@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from . import (
+    api_runner,
     core,
     dns_auditor,
     probe,
@@ -21,4 +22,7 @@ router.include_router(
 )
 router.include_router(
     dns_auditor.router, prefix="/dns-audit", tags=["DNS & DNSSEC Auditor"]
+)
+router.include_router(
+    api_runner.router, prefix="/http-runner", tags=["Stateless API Runner"]
 )
