@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/raizestudio/my_tools_sv/compare/0w-v1.1.0...0w-v1.1.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* add release please version to config ([2d0915d](https://github.com/raizestudio/my_tools_sv/commit/2d0915dd7089da5fc9b8d59f87bbae5638ab1c4d))
+
 ## [1.1.0](https://github.com/raizestudio/my_tools_sv/compare/0w-v1.0.0...0w-v1.1.0) (2026-10-27)
 
 
