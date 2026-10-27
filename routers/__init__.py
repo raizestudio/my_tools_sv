@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from . import (
     core,
+    dns_auditor,
     probe,
     secret,
     url_shtnr,
@@ -10,11 +11,14 @@ from . import (
 )
 
 router = APIRouter()
-router.include_router(core.router, tags=["core"])
-router.include_router(url_shtnr.router, prefix="/url-shtnr", tags=["url-shtnr"])
-router.include_router(secret.router, prefix="/secrets", tags=["secrets"])
-router.include_router(webhook.router, prefix="/webhooks", tags=["webhooks"])
-router.include_router(probe.router, prefix="/probe", tags=["network probe"])
+router.include_router(core.router, tags=["Core"])
+router.include_router(url_shtnr.router, prefix="/url-shtnr", tags=["URL Shortener"])
+router.include_router(secret.router, prefix="/secrets", tags=["Secrets"])
+router.include_router(webhook.router, prefix="/webhooks", tags=["Webhooks"])
+router.include_router(probe.router, prefix="/probe", tags=["Network Probe"])
 router.include_router(
-    url_tracer.router, prefix="/url-trace", tags=["url tracer"]
+    url_tracer.router, prefix="/url-trace", tags=["URL Tracel & Defanger"]
+)
+router.include_router(
+    dns_auditor.router, prefix="/dns-audit", tags=["DNS & DNSSEC Auditor"]
 )
