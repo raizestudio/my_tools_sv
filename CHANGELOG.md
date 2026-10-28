@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/raizestudio/my_tools_sv/compare/0w-v1.1.1...0w-v1.1.2) (2026-10-28)
+
+
+### Bug Fixes
+
+* issues with api runner route ([708c730](https://github.com/raizestudio/my_tools_sv/commit/708c7302d0945c36d0354e987bf777af8164928a))
+
 ## [1.1.1](https://github.com/raizestudio/my_tools_sv/compare/0w-v1.1.0...0w-v1.1.1) (2026-10-27)
 
 
