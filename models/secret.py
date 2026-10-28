@@ -14,7 +14,7 @@ class SecretPaste(models.Model):
     iv = fields.CharField(max_length=64)
     max_views = fields.IntField(default=1)
     view_count = fields.IntField(default=0)
-    expires_at = fields.DatetimeField()
+    expires_at = fields.DatetimeField(index=True)
     created_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:

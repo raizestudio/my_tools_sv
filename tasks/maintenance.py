@@ -2,7 +2,7 @@
 import logging
 from datetime import UTC, datetime
 
-from tortoise.expressions import F
+from tortoise.expressions import F, Q
 
 from models.secret import SecretPaste
 from models.webhook import CapturedWebhook, WebhookSession
@@ -24,25 +24,23 @@ async def purge_expired_records() -> dict:
     logger.info("[Maintenance] Starting scheduled database purge...")
 
     try:
-        expired_secrets = await SecretPaste.filter(expires_at__lt=now).delete()
-        burned_secrets = await SecretPaste.filter(
-            view_count__gte=F("max_views")
+        purged_secrets = await SecretPaste.filter(
+            Q(expires_at__lt=now) | Q(view_count__gte=F("max_views"))
         ).delete()
-        total_secrets = expired_secrets + burned_secrets
 
         expired_sessions = await WebhookSession.filter(expires_at__lt=now).delete()
 
         orphan_captures = await CapturedWebhook.filter(session_id__isnull=True).delete()
 
         result = {
-            "purged_secrets": total_secrets,
+            "purged_secrets": purged_secrets,
             "purged_sessions": expired_sessions,
             "orphan_captures": orphan_captures,
             "executed_at": now.isoformat(),
         }
 
         logger.info(
-            f"[Maintenance] Purge complete: {total_secrets} secrets, "
+            f"[Maintenance] Purge complete: {purged_secrets} secrets, "
             f"{expired_sessions} webhook sessions, {orphan_captures} orphan captures."
         )
         return result
