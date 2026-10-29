@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/raizestudio/zerow_sv/compare/0w-v1.1.3...0w-v1.1.4) (2026-10-29)
+
+
+### Bug Fixes
+
+* improve url shortener perf and security ([8e58218](https://github.com/raizestudio/zerow_sv/commit/8e58218b93403fab54a8db116713de823c4c689e))
+
 ## [1.1.3](https://github.com/raizestudio/zerow_sv/compare/0w-v1.1.2...0w-v1.1.3) (2026-10-28)
 
 
