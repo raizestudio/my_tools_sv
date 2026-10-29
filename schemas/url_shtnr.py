@@ -1,7 +1,9 @@
 # schemas/url_shtnr.py
+from datetime import datetime
 import ipaddress
 import re
 from typing import Literal
+
 from pydantic import BaseModel, HttpUrl, field_validator
 
 BLOCKED_DOMAINS = {
@@ -11,6 +13,7 @@ BLOCKED_DOMAINS = {
     "www.dev.0w.lat",
     "localhost",
 }
+
 
 class ShortenRequest(BaseModel):
     url: HttpUrl
@@ -27,24 +30,38 @@ class ShortenRequest(BaseModel):
 
         clean_host = host.lower().strip("[]")
 
-        # 1. Anti-Loop: Prevent shortening our own platform URLs
+        # 1. Anti-Loop: Prevent shortening platform domains
         if clean_host in BLOCKED_DOMAINS:
             raise ValueError("Impossible de raccourcir un lien interne à 0w.")
 
-        # 2. Anti-SSRF: Block private, loopback, link-local, and reserved IP ranges
+        # 2. Check if host is an IP address
+        is_ip = False
+        parsed_ip = None
         try:
-            ip = ipaddress.ip_address(clean_host)
+            parsed_ip = ipaddress.ip_address(clean_host)
+            is_ip = True
+        except ValueError:
+            # Not a raw IP address -> proceed to domain validation below
+            pass
+
+        # 3. Block private/local IP ranges
+        if is_ip and parsed_ip:
             if (
-                ip.is_private
-                or ip.is_loopback
-                or ip.is_link_local
-                or ip.is_reserved
-                or ip.is_multicast
+                parsed_ip.is_private
+                or parsed_ip.is_loopback
+                or parsed_ip.is_link_local
+                or parsed_ip.is_reserved
+                or parsed_ip.is_multicast
             ):
                 raise ValueError("Les adresses réseau privées ou locales sont interdites.")
-        except ValueError:
-            # Not a raw IP; verify it is a valid domain with a TLD
-            if "." not in clean_host or clean_host.endswith((".local", ".internal")):
+        else:
+            # 4. Block local/unresolvable domain suffixes
+            if (
+                "." not in clean_host
+                or clean_host.endswith(".local")
+                or clean_host.endswith(".internal")
+                or clean_host.endswith(".localhost")
+            ):
                 raise ValueError("Le domaine cible est invalide ou privé.")
 
         return v

@@ -10,11 +10,24 @@ TORTOISE_ORM = {
     "connections": {"default": settings.db_url},
     "apps": {
         "models": {
-            "models": [f"models.{model}" for model in settings.models] + ["aerich.models"],
+            "models": [f"models.{model}" for model in settings.models]
+            + ["aerich.models"],
             "default_connection": "default",
         },
     },
 }
+
+TEST_TORTOISE_ORM = {
+    "connections": {"default": settings.db_url_test},
+    "apps": {
+        "models": {
+            "models": [f"models.{model}" for model in settings.models]
+            + ["aerich.models"],
+            "default_connection": "default",
+        },
+    },
+}
+
 
 class Database:
     @staticmethod
@@ -34,6 +47,7 @@ class Database:
             password=settings.db_password,
             database="postgres",
             host=settings.db_host,
+            port=settings.db_port,  # <-- Pass the configured port
         )
         await conn.execute(f"DROP DATABASE IF EXISTS {settings.db_test_name};")
         await conn.execute(f"CREATE DATABASE {settings.db_test_name};")

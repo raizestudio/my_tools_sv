@@ -17,6 +17,8 @@ dependencies = [
     "uvicorn[standard]>=0.54.0",
     "httpx2>=2.16.0",
     "dnspython>=2.9.0",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
 ]
 
 [project.scripts]
